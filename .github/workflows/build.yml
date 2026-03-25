@@ -1,4 +1,4 @@
-name: Build and Test with MySQL In Java Projects
+name: Build and Test with PostgreSQL In Java Projects
 
 on:
   workflow_call:
@@ -8,20 +8,17 @@ on:
         required: false
         type: string
         default: '17'
-      mysql-database:
+      postgres-database:
         description: 'Nombre de la base de datos de prueba'
         required: true
         type: string
-      mysql-user:
-        description: 'Usuario de MySQL para los tests'
+      postgres-user:
+        description: 'Usuario de PostgreSQL para los tests'
         required: true
         type: string
     secrets:
-      MYSQL_ROOT_PASSWORD:
-        description: 'Contraseña del usuario root de MySQL'
-        required: true
-      MYSQL_PASSWORD:
-        description: 'Contraseña del usuario de MySQL'
+      POSTGRES_PASSWORD:
+        description: 'Contraseña del usuario de PostgreSQL'
         required: true
 
 jobs:
@@ -48,17 +45,16 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      mysql:
-        image: mysql:8.0
+      postgres:
+        image: postgres:16
         env:
-          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-          MYSQL_DATABASE: ${{ inputs.mysql-database }}
-          MYSQL_USER: ${{ inputs.mysql-user }}
-          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          POSTGRES_DB: ${{ inputs.postgres-database }}
+          POSTGRES_USER: ${{ inputs.postgres-user }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         ports:
-          - 3306:3306
+          - 5432:5432
         options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 --silent"
+          --health-cmd pg_isready
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
@@ -77,6 +73,6 @@ jobs:
       - name: Run integration tests
         run: mvn verify -P integration-tests -Dsurefire.skip=true
         env:
-          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/${{ inputs.mysql-database }}
-          SPRING_DATASOURCE_USERNAME: ${{ inputs.mysql-user }}
-          SPRING_DATASOURCE_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/${{ inputs.postgres-database }}
+          SPRING_DATASOURCE_USERNAME: ${{ inputs.postgres-user }}
+          SPRING_DATASOURCE_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
