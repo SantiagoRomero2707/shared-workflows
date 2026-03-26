@@ -11,13 +11,12 @@ jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
 
     steps:
       - name: Install Railway CLI
         run: npm install -g @railway/cli
 
       - name: Deploy to Railway
-        run: railway redeploy --project project/253aee5e-6f86-4685-89df-17b8437c96b7 --service artlas-api --yes
+        run: railway redeploy --service artlas-api --yes
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
