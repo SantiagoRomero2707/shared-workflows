@@ -2,12 +2,6 @@ name: Deploy to Railway
 
 on:
   workflow_call:
-    inputs:
-      environment:
-        description: 'Deployment environment'
-        required: false
-        type: string
-        default: 'production'
     secrets:
       RAILWAY_TOKEN:
         description: 'Railway API token for deployment'
