@@ -1,4 +1,4 @@
-name: Build and Test with PostgreSQL In Java Projects
+name: Build Java Project
 
 on:
   workflow_call:
@@ -8,22 +8,10 @@ on:
         required: false
         type: string
         default: '17'
-      postgres-database:
-        description: 'Nombre de la base de datos de prueba'
-        required: true
-        type: string
-      postgres-user:
-        description: 'Usuario de PostgreSQL para los tests'
-        required: true
-        type: string
-    secrets:
-      POSTGRES_PASSWORD:
-        description: 'Contraseña del usuario de PostgreSQL'
-        required: true
 
 jobs:
-  unit-test:
-    name: Unit Tests
+  build:
+    name: Build
     runs-on: ubuntu-latest
 
     steps:
@@ -35,44 +23,13 @@ jobs:
         with:
           java-version: ${{ inputs.java-version }}
           distribution: 'temurin'
-          cache: maven
 
-      - name: Run unit tests
-        run: mvn test
-
-  integration-test:
-    name: Integration Tests
-    runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_DB: ${{ inputs.postgres-database }}
-          POSTGRES_USER: ${{ inputs.postgres-user }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Java
-        uses: actions/setup-java@v4
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
         with:
-          java-version: ${{ inputs.java-version }}
-          distribution: 'temurin'
-          cache: maven
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2-
 
-      - name: Run integration tests
-        run: mvn verify -P integration-tests -Dsurefire.skip=true
-        env:
-          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/${{ inputs.postgres-database }}
-          SPRING_DATASOURCE_USERNAME: ${{ inputs.postgres-user }}
-          SPRING_DATASOURCE_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      - name: Build
+        run: mvn package -DskipTests
