@@ -4,7 +4,7 @@ on:
   workflow_call:
     secrets:
       RAILWAY_TOKEN:
-        description: 'Railway API token for deployment'
+        description: 'Railway account token for deployment'
         required: true
 
 jobs:
@@ -19,4 +19,4 @@ jobs:
       - name: Deploy to Railway
         run: railway redeploy --service artlas-api --yes
         env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
