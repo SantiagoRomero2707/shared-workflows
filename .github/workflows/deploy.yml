@@ -3,6 +3,10 @@ name: Deploy to Railway
 on:
   workflow_call:
     inputs:
+      image-tag:
+        description: 'Full Docker image reference to deploy (e.g. ghcr.io/owner/repo:sha)'
+        required: true
+        type: string
       environment:
         description: 'Deployment environment'
         required: false
@@ -20,13 +24,10 @@ jobs:
     environment: ${{ inputs.environment }}
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       - name: Install Railway CLI
         run: npm install -g @railway/cli
 
       - name: Deploy to Railway
-        run: railway up --detach
+        run: railway up --image ${{ inputs.image-tag }} --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
