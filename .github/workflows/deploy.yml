@@ -2,9 +2,17 @@ name: Deploy to Railway
 
 on:
   workflow_call:
+    inputs:
+      railway-service:
+        description: 'Railway service name to redeploy'
+        required: true
+        type: string
     secrets:
       RAILWAY_TOKEN:
         description: 'Railway account token for deployment'
+        required: true
+      RAILWAY_PROJECT_ID:
+        description: 'Railway project ID'
         required: true
 
 jobs:
@@ -17,6 +25,7 @@ jobs:
         run: npm install -g @railway/cli
 
       - name: Deploy to Railway
-        run: railway redeploy --service artlas-api --yes
+        run: railway redeploy --service ${{ inputs.railway-service }} --yes
         env:
           RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
